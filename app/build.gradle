@@ -64,5 +64,10 @@ dependencies {
     // RxJava for asynchronous programming
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
+    // Room persistence library
+    implementation 'androidx.room:room-runtime:2.2.5'
+    implementation 'androidx.room:room-rxjava2:2.2.5'
+    kapt 'org.xerial:sqlite-jdbc:3.34.0'
+
 
 }

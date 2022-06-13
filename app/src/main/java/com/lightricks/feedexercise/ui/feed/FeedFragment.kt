@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_LONG
 import com.google.android.material.snackbar.Snackbar
 import com.lightricks.feedexercise.R
+import com.lightricks.feedexercise.database.FeedDatabase
 import com.lightricks.feedexercise.databinding.FeedFragmentBinding
 
 /**
@@ -26,9 +27,11 @@ class FeedFragment : Fragment() {
     private lateinit var viewModel: FeedViewModel
     private lateinit var feedAdapter: FeedAdapter
 
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         dataBinding = DataBindingUtil.inflate(inflater, R.layout.feed_fragment, container, false)
         setupViewModel()
         setupViews()
@@ -36,7 +39,7 @@ class FeedFragment : Fragment() {
     }
 
     private fun setupViewModel() {
-        viewModel = ViewModelProvider(this, FeedViewModelFactory())
+        viewModel = ViewModelProvider(this, FeedViewModelFactory(requireContext()))
             .get(FeedViewModel::class.java)
 
         viewModel.getFeedItems().observe(viewLifecycleOwner, Observer { items ->
@@ -67,10 +70,5 @@ class FeedFragment : Fragment() {
     private fun showNetworkError() {
         Snackbar.make(dataBinding.mainContent, R.string.network_error, LENGTH_LONG)
             .show()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.onDestroyFragment();
     }
 }

@@ -14,21 +14,21 @@ import retrofit2.http.GET
 
 interface FeedApiService {
     @GET("Android/demo/feed.json")
-    fun getResponse(): Single<GetFeedResponse>
+    fun getFeed(): Single<GetFeedResponse>
 }
 
 object FeedApiServiceImpl {
-        private val moshi: Moshi =
-            Moshi.Builder()
-                .add(KotlinJsonAdapterFactory())
-                .build()
+    private val moshi: Moshi =
+        Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
 
-        private val retrofit: Retrofit =
-            Retrofit.Builder()
-                .baseUrl("https://assets.swishvideoapp.com")
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(MoshiConverterFactory.create(moshi))
-                .build()
+    private val retrofit: Retrofit =
+        Retrofit.Builder()
+            .baseUrl("https://assets.swishvideoapp.com")
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
 
-        val service: FeedApiService = retrofit.create(FeedApiService::class.java)
-    }
+    val service: FeedApiService = retrofit.create(FeedApiService::class.java)
+}
