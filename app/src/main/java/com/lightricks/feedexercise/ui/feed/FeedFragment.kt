@@ -68,4 +68,9 @@ class FeedFragment : Fragment() {
         Snackbar.make(dataBinding.mainContent, R.string.network_error, LENGTH_LONG)
             .show()
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.onDestroyFragment();
+    }
 }
