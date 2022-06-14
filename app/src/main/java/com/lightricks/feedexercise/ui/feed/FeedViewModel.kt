@@ -79,23 +79,19 @@ open class FeedViewModel(private val context: Context) : ViewModel() {
 
         feedItems.postValue(listOfFeedItems)
 
-        if (listOfFeedItems.isEmpty()) {
-            isEmpty.postValue(true)
-        } else {
-            isLoading.postValue(false)
-        }
+        isEmpty.postValue(listOfFeedItems.isEmpty())
+        isLoading.postValue(false)
 
         val listOfEntities = listOfFeedItems.map {
             FeedItemEntity(
                 it.id,
-                urlString + it.thumbnailUrl,
+                it.thumbnailUrl,
                 it.isPremium
             )
         }
 
         database.feedItemDao().insertList(listOfEntities)
             .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
             .subscribe()
 
     }
