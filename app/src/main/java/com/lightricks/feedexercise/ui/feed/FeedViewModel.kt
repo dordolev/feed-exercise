@@ -1,35 +1,33 @@
 package com.lightricks.feedexercise.ui.feed
 
-import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.*
-import androidx.room.Room
 import com.lightricks.feedexercise.data.FeedItem
 import com.lightricks.feedexercise.database.FeedDatabase
+import com.lightricks.feedexercise.database.FeedItemEntity
+import com.lightricks.feedexercise.database.*
 import com.lightricks.feedexercise.network.FeedApiServiceImpl
 import com.lightricks.feedexercise.network.GetFeedResponse
 import com.lightricks.feedexercise.util.Event
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
 import java.lang.IllegalArgumentException
-import java.lang.NullPointerException
 
 /**
  * This view model manages the data for [FeedFragment].
  */
 open class FeedViewModel(private val context: Context) : ViewModel() {
-    private val stateInternal: MutableLiveData<State> = MutableLiveData<State>(DEFAULT_STATE)
     private val networkErrorEvent = MutableLiveData<Event<String>>()
     private val feedItems = MutableLiveData<List<FeedItem>>()
     private val isLoading = MutableLiveData<Boolean>()
     private val isEmpty = MutableLiveData<Boolean>()
     private var disposable: Disposable? = null
-    private var urlString : String = "https://assets.swishvideoapp.com/Android/demo/catalog/thumbnails/"
-//    private lateinit var database: FeedDatabase
+    private val urlString: String =
+        "https://assets.swishvideoapp.com/Android/demo/catalog/thumbnails/"
+    private val database: FeedDatabase = getFeedDB(context)
 
     fun getIsLoading(): LiveData<Boolean> {
         return isLoading
@@ -51,7 +49,6 @@ open class FeedViewModel(private val context: Context) : ViewModel() {
 //        refresh()
     }
 
-    //    @SuppressLint("CheckResult")
     fun refresh() {
         isEmpty.postValue(false)
         isLoading.postValue(true)
@@ -67,33 +64,40 @@ open class FeedViewModel(private val context: Context) : ViewModel() {
 
 
     private fun handleNetworkError(error: Throwable) {
-        networkErrorEvent.postValue(Event(error?.localizedMessage ?: "NullPointerException"))
+        networkErrorEvent.postValue(Event(error?.localizedMessage ?: "Error Occurred"))
         isLoading.postValue(false)
     }
 
     private fun handleResponse(feedResponse: GetFeedResponse) {
-        feedItems.postValue(feedResponse.templatesMetadata.map {
+        val listOfFeedItems = (feedResponse.templatesMetadata.map {
             FeedItem(
                 it.id,
                 urlString + it.templateThumbnailURI,
                 it.isPremium
             )
         })
-        isLoading.postValue(false)
 
-        if(getFeedItems().value?.isEmpty() == true){
+        feedItems.postValue(listOfFeedItems)
+
+        if (listOfFeedItems.isEmpty()) {
             isEmpty.postValue(true)
+        } else {
+            isLoading.postValue(false)
         }
 
-//        database.feedItemDao().insertList(feedItems.value!!)
-    }
+        val listOfEntities = listOfFeedItems.map {
+            FeedItemEntity(
+                it.id,
+                urlString + it.thumbnailUrl,
+                it.isPremium
+            )
+        }
 
-    private fun updateState(transform: State.() -> State) {
-        stateInternal.value = transform(getState())
-    }
+        database.feedItemDao().insertList(listOfEntities)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe()
 
-    private fun getState(): State {
-        return stateInternal.value!!
     }
 
     override fun onCleared() {

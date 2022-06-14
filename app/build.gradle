@@ -4,13 +4,13 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 32
     buildToolsVersion '29.0.3'
 
     defaultConfig {
         applicationId 'com.lightricks.feedexercise'
         minSdkVersion 24
-        targetSdkVersion 29
+        targetSdkVersion 32
         versionCode 1
         versionName '1.0'
 
@@ -65,9 +65,10 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
     // Room persistence library
-    implementation 'androidx.room:room-runtime:2.2.5'
-    implementation 'androidx.room:room-rxjava2:2.2.5'
-    kapt 'org.xerial:sqlite-jdbc:3.34.0'
+    def room_version = "2.4.0-alpha03"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation 'androidx.room:room-rxjava2:2.4.0'
+    kapt "androidx.room:room-compiler:$room_version"
 
 
 }
