@@ -47,7 +47,9 @@ open class FeedViewModel(private val feedRepository: FeedRepository) : ViewModel
     fun refresh() {
         isLoading.postValue(true)
         disposable = feedRepository.refresh().subscribe(
-            { isLoading.postValue(false) },
+            {
+                isLoading.postValue(false)
+            },
             { error -> handleNetworkError(error) }
         )
     }
