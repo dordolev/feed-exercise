@@ -1,21 +1,13 @@
 package com.lightricks.feedexercise.ui.feed
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.*
-import androidx.lifecycle.LiveDataReactiveStreams
 import com.lightricks.feedexercise.data.FeedItem
 import com.lightricks.feedexercise.data.FeedRepository
-import com.lightricks.feedexercise.database.FeedDatabase
-import com.lightricks.feedexercise.database.FeedItemEntity
 import com.lightricks.feedexercise.database.*
 import com.lightricks.feedexercise.network.FeedApiServiceImpl
-import com.lightricks.feedexercise.network.GetFeedResponse
 import com.lightricks.feedexercise.util.Event
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import java.lang.IllegalArgumentException
 
 /**
@@ -62,25 +54,13 @@ open class FeedViewModel(private val feedRepository: FeedRepository) : ViewModel
 
 
     private fun handleNetworkError(error: Throwable) {
-        networkErrorEvent.postValue(Event(error?.localizedMessage ?: "Error Occurred"))
+        networkErrorEvent.postValue(Event(error.localizedMessage ?: "Error Occurred"))
         isLoading.postValue(false)
     }
 
     override fun onCleared() {
         super.onCleared()
         disposable?.dispose()
-    }
-
-    data class State(
-        val feedItems: List<FeedItem>?,
-        val isLoading: Boolean
-    )
-
-    companion object {
-        private val DEFAULT_STATE = State(
-            feedItems = null,
-            isLoading = false
-        )
     }
 }
 
