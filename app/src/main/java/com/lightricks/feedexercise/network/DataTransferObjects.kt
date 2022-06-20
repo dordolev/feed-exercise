@@ -5,8 +5,8 @@ data class GetFeedResponse(
 )
 
 data class TemplatesMetadataItem(
-    val configuration: String,
-    val id: String,
+    val configuration : String,
+    val id : String,
     val isNew: Boolean,
     val isPremium: Boolean,
     val templateCategories: List<String>,

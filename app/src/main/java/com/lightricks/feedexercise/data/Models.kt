@@ -9,10 +9,4 @@ data class FeedItem(
     val id: String, // Kotlin note: "val" means read-only value.
     val thumbnailUrl: String,
     val isPremium: Boolean
-) {
-    override fun equals(other: Any?): Boolean {
-        val feedItem : FeedItem = other as FeedItem
-        return id == feedItem.id && thumbnailUrl == feedItem.thumbnailUrl && isPremium == feedItem.isPremium
-    }
-}
-
+)
