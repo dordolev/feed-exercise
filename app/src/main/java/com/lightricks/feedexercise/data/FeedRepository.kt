@@ -49,20 +49,25 @@ class FeedRepository(
     }
 
     private fun switchLast(list: List<FeedItem>): List<FeedItem> {
-        val numOfRefreshMod: Int = numOfRefresh % list.size
-        if (list.isNotEmpty() && numOfRefreshMod >= 1) {
-            val lastElementList = listOf(list[list.size - 1 - numOfRefreshMod])
-            var newList = list.subList(
-                0,
-                list.size - 1 - numOfRefreshMod
-            ) + list.subList(list.size - numOfRefreshMod, list.size - 1)
-            newList = lastElementList + newList
-            return newList
-        } else if (list.isNotEmpty() && numOfRefreshMod == 0) {
-            val lastElementList = listOf(list[list.size - 1])
-            var newList = list.subList(0, list.size - 1)
-            newList = lastElementList + newList
-            return newList
+        if (list.isNotEmpty()) {
+            val numOfRefreshMod: Int = numOfRefresh % list.size
+            if (numOfRefreshMod >= 1) {
+                val lastElementList = listOf(list[list.size - 1 - numOfRefreshMod])
+                var newList = list.subList(
+                    0,
+                    list.size - 1 - numOfRefreshMod
+                ) + list.subList(list.size - numOfRefreshMod, list.size - 1)
+                newList = lastElementList + newList
+                return newList
+            } else if (numOfRefreshMod == 0) {
+                val lastElementList = listOf(list[list.size - 1])
+                var newList = list.subList(0, list.size - 1)
+                newList = lastElementList + newList
+                return newList
+            }
+            else {
+                return list
+            }
         } else {
             return list
         }
