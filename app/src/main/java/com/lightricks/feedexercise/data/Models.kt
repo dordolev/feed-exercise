@@ -9,4 +9,9 @@ data class FeedItem(
     val id: String, // Kotlin note: "val" means read-only value.
     val thumbnailUrl: String,
     val isPremium: Boolean
+<<<<<<< HEAD
 )
+=======
+)
+
+>>>>>>> 7275d2d (Fix PR comments on tests)
