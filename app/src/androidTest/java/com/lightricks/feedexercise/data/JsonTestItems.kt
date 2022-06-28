@@ -9,7 +9,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.lightricks.feedexercise.data.FeedRepository
 import com.lightricks.feedexercise.network.TemplatesMetadataItem
 
-class JsonTestItems (targetContext : Context, fileName : String) {
+class JsonTestItems(targetContext: Context, fileName: String) {
     private val targetContext = targetContext
     private val fileName = fileName
 
@@ -28,11 +28,11 @@ class JsonTestItems (targetContext : Context, fileName : String) {
         }
     }
 
-    fun listOfJsonFeedItems() : List<FeedItem>{
+    fun listOfJsonFeedItems(): List<FeedItem> {
         return createEntityList(jsonAdapter.fromJson(testJsonStringify())?.templatesMetadata!!).toFeedItems()
     }
 
-    fun listOfJsonEntityItems() : List<FeedItemEntity> {
+    fun listOfJsonEntityItems(): List<FeedItemEntity> {
         return createEntityList(jsonAdapter.fromJson(testJsonStringify())?.templatesMetadata!!)
     }
 

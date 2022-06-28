@@ -1,17 +1,31 @@
 package com.lightricks.feedexercise.data
 
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.google.common.truth.Truth.assertThat
+import com.lightricks.feedexercise.database.FeedDatabase
+import com.lightricks.feedexercise.database.FeedItemEntity
+import com.lightricks.feedexercise.network.FeedApiService
+import com.lightricks.feedexercise.network.FeedApiServiceMock
+import com.lightricks.feedexercise.network.GetFeedResponse
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import io.reactivex.Single
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class FeedRepositoryTest {
-<<<<<<< HEAD
-   //todo: add the tests here
-=======
     @get: Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
     private val fileName = "get_feed_response.json"
@@ -22,42 +36,32 @@ class FeedRepositoryTest {
 
     private val listOfJsonEntityItems = jsonTestItems.listOfJsonEntityItems()
 
-    private lateinit var feedDatabaseMock : FeedDatabase
+    private lateinit var feedDatabaseMock: FeedDatabase
 
-    private val feedApiServiceMock = object : FeedApiService {
-        val moshi: Moshi = Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build()
-        val jsonAdapter: JsonAdapter<GetFeedResponse> = moshi.adapter(GetFeedResponse::class.java)
-
-        override fun getFeed(): Single<GetFeedResponse> {
-            return Single.just(jsonAdapter.fromJson(jsonTestItems.testJsonStringify()))
-        }
-    }
+    private val feedApiServiceMock = FeedApiServiceMock(jsonTestItems)
 
     private lateinit var feedRepository: FeedRepository
 
     @Before
     fun initRepository() {
-        feedDatabaseMock = Room.inMemoryDatabaseBuilder(targetContext, FeedDatabase::class.java).build()
+        feedDatabaseMock =
+            Room.inMemoryDatabaseBuilder(targetContext, FeedDatabase::class.java).build()
         feedRepository = FeedRepository(feedApiServiceMock, feedDatabaseMock)
     }
 
     @Test
     fun testRefresh_isSavedToDatabase() {
-        val observerTest = feedRepository.refresh().test()
+        feedDatabaseMock.feedItemDao().insertList(listOfJsonEntityItems)
 
-        observerTest.awaitTerminalEvent()
-        observerTest.assertComplete()
-        observerTest.assertNoErrors()
+        val feedDatabaseFeedItems: List<FeedItem>? =
+            feedDatabaseMock.feedItemDao().getAll().blockingObserve()?.toFeedItems()
+        val feedRepositoryFeedItems: List<FeedItem>? = feedRepository.feedItems.blockingObserve()
 
-        val feedDatabaseListOfEntities = feedDatabaseMock.feedItemDao().getAll().blockingObserve()
-
-        assertThat(feedDatabaseListOfEntities).containsExactlyElementsIn(listOfJsonEntityItems)
+        assertThat(feedDatabaseFeedItems).containsExactlyElementsIn(feedRepositoryFeedItems)
     }
 
     @Test
-    fun testRefresh_isSavedToFeedItems() {
+    fun test_isSavedToFeedItems() {
         val observerTest = feedRepository.refresh().test()
 
         observerTest.awaitTerminalEvent()
@@ -67,12 +71,32 @@ class FeedRepositoryTest {
         val feedRepositoryFeedItems: List<FeedItem>? = feedRepository.feedItems.blockingObserve()
 
         assertThat(feedRepositoryFeedItems).containsExactlyElementsIn(listOfJsonFeedItems)
-
     }
 
     @After
     fun closeDatabase() {
         feedDatabaseMock.close()
     }
->>>>>>> 7275d2d (Fix PR comments on tests)
+}
+
+private fun List<FeedItemEntity>.toFeedItems(): List<FeedItem> {
+    return map {
+        FeedItem(it.id, it.thumbnailUrl, it.isPremium)
+    }
+}
+
+private fun <T> LiveData<T>.blockingObserve(): T? {
+    var value: T? = null
+    val latch = CountDownLatch(1)
+    val observer = object : Observer<T> {
+        override fun onChanged(t: T) {
+            value = t
+            latch.countDown()
+            removeObserver(this)
+        }
+    }
+
+    observeForever(observer)
+    latch.await(5, TimeUnit.SECONDS)
+    return value
 }
